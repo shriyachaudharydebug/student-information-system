@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Manager</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #222;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+      margin-bottom: 24px;
+    }
+    h1, h2 {
+      margin-top: 0;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 24px;
+    }
+    form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #cfd6dd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .full-width {
+      grid-column: 1 / -1;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .primary {
+      background: #1f6feb;
+      color: white;
+    }
+    .secondary {
+      background: #e9eef5;
+      color: #1f2937;
+    }
+    .danger {
+      background: #d7263d;
+      color: white;
+    }
+    .status {
+      min-height: 20px;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+    .status.success {
+      color: #0f7b0f;
+    }
+    .status.error {
+      color: #c62828;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    th, td {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 12px 10px;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background: #f8fafc;
+    }
+    .empty {
+      text-align: center;
+      color: #666;
+      padding: 24px;
+    }
+    @media (max-width: 700px) {
+      .container {
+        margin: 20px auto;
+      }
+      .card {
+        padding: 18px;
+      }
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      thead {
+        display: none;
+      }
+      tr {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        background: white;
+      }
+      td {
+        border-bottom: 1px solid #f0f2f5;
+      }
+      td:last-child {
+        border-bottom: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Student Management</h1>
+      <p class="subtitle">This page connects to your Flask backend on <code>127.0.0.1:5000</code> or <code>127.0.0.1:5001</code>.</p>
+
+      <form id="student-form">
+        <div>
+          <label for="name">Student Name</label>
+          <input type="text" id="name" placeholder="Enter student name" required>
+        </div>
+        <div>
+          <label for="dob">Date of Birth</label>
+          <input type="date" id="dob">
+        </div>
+        <div>
+          <label for="gender">Gender</label>
+          <select id="gender">
+            <option value="">Select gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="phone">Phone</label>
+          <input type="text" id="phone" placeholder="Enter phone number">
+        </div>
+        <div>
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Enter email">
+        </div>
+        <div>
+          <label for="deptId">Department ID</label>
+          <input type="number" id="deptId" placeholder="Enter department ID">
+        </div>
+        <div class="full-width actions">
+          <button type="submit" class="primary">Add Student</button>
+          <button type="button" class="secondary" id="refresh-btn">Refresh Students</button>
+        </div>
+      </form>
+
+      <div id="status-message" class="status"></div>
+    </div>
+
+    <div class="card">
+      <h2>Students List</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>DOB</th>
+            <th>Gender</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Dept ID</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="students-table-body">
+          <tr>
+            <td colspan="8" class="empty">Loading students...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="script.js?v=20260729"></script>
+</body>
+</html>

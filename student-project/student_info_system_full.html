@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Info System</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f4f2ee;--surface:#ffffff;--surface2:#faf9f7;--border:#e2dfd8;--border2:#ccc9c0;
+  --text:#1a1916;--muted:#7a7870;--muted2:#b0ada6;--accent:#2d5be3;--accent-light:#eef1fd;
+  --accent-dark:#1a3fa8;--green:#1a7a4a;--green-light:#e8f5ee;--red:#c0392b;--red-light:#fdf0ef;
+  --amber:#b45309;--amber-light:#fef3e2;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg:0 4px 16px rgba(0,0,0,0.12),0 12px 40px rgba(0,0,0,0.08);
+  --radius:10px;--radius-lg:14px;
+}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5}
+button{font-family:inherit;cursor:pointer;border:none;outline:none}
+input,select,textarea{font-family:inherit;outline:none}
+a{text-decoration:none;color:inherit}
+#login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1916 0%,#2d2a24 50%,#1a1916 100%);position:relative;overflow:hidden;}
+#login-page::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 20% 50%,rgba(45,91,227,0.15) 0%,transparent 50%),radial-gradient(circle at 80% 50%,rgba(26,122,74,0.1) 0%,transparent 50%);}
+.login-card{background:#fff;border-radius:20px;padding:48px;width:420px;box-shadow:0 24px 80px rgba(0,0,0,0.4);position:relative;z-index:1;}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px;}
+.login-logo-icon{width:40px;height:40px;background:var(--text);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:18px;}
+.login-logo-text{font-size:1.3rem;font-weight:700;color:var(--text)}
+.login-title{font-size:1.6rem;font-weight:700;margin-bottom:6px}
+.login-sub{color:var(--muted);font-size:0.9rem;margin-bottom:32px}
+.role-tabs{display:flex;gap:6px;margin-bottom:28px;background:var(--bg);border-radius:10px;padding:4px}
+.role-tab{flex:1;padding:9px;text-align:center;border-radius:7px;font-weight:500;font-size:0.85rem;cursor:pointer;transition:all 0.2s;color:var(--muted);}
+.role-tab.active{background:#fff;color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,0.12)}
+.form-group{margin-bottom:18px}
+.form-label{display:block;font-weight:500;font-size:0.85rem;margin-bottom:6px;color:var(--text)}
+.form-input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:0.95rem;transition:border-color 0.2s;background:#fff;color:var(--text);}
+.form-input:focus{border-color:var(--accent)}
+.login-btn{width:100%;padding:13px;background:var(--text);color:#fff;border-radius:var(--radius);font-size:1rem;font-weight:600;transition:background 0.2s,transform 0.1s;margin-top:8px;}
+.login-btn:hover{background:#333}.login-btn:active{transform:scale(0.99)}
+.login-hint{margin-top:20px;padding:14px;background:var(--bg);border-radius:var(--radius);font-size:0.82rem;color:var(--muted);}
+.login-hint strong{color:var(--text)}
+#app{display:none;min-height:100vh;flex-direction:column}
+#app.visible{display:flex}
+.topbar{height:58px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100;}
+.topbar-logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:1rem}
+.topbar-logo-icon{width:30px;height:30px;background:var(--text);border-radius:7px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;}
+.topbar-divider{width:1px;height:22px;background:var(--border);margin:0 4px}
+.topbar-role-badge{font-size:0.75rem;padding:3px 10px;border-radius:20px;font-weight:600;}
+.role-admin .topbar-role-badge{background:#1a1916;color:#fff}
+.role-student .topbar-role-badge{background:var(--accent-light);color:var(--accent)}
+.role-faculty .topbar-role-badge{background:var(--green-light);color:var(--green)}
+.topbar-user{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:0.88rem}
+.user-avatar{width:32px;height:32px;border-radius:8px;background:var(--border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;}
+.logout-btn{padding:6px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.82rem;font-weight:500;background:#fff;transition:all 0.2s;}
+.logout-btn:hover{border-color:var(--red);color:var(--red)}
+.app-body{display:flex;flex:1}
+.sidebar{width:230px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);padding:20px 0;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;}
+.main-content{flex:1;padding:28px;overflow:auto;min-width:0}
+.nav-section-label{font-size:0.68rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);padding:0 18px;margin:16px 0 6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:0.88rem;font-weight:500;color:var(--muted);cursor:pointer;transition:all 0.15s;border-left:2px solid transparent;user-select:none;}
+.nav-item:hover{color:var(--text);background:var(--bg)}
+.nav-item.active{color:var(--accent);background:var(--accent-light);border-left-color:var(--accent)}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.page{display:none;animation:fadeIn 0.25s ease}.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-title{font-size:1.6rem;font-weight:700;letter-spacing:-0.02em}
+.page-sub{font-size:0.88rem;color:var(--muted);margin-top:2px}
+.page-actions{display:flex;gap:10px;align-items:center}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:28px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 18px;transition:box-shadow 0.2s,transform 0.2s;}
+.stat-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.stat-val{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:500;line-height:1}
+.stat-lbl{font-size:0.78rem;color:var(--muted);margin-top:6px;font-weight:500}
+.stat-card.blue .stat-val{color:var(--accent)}.stat-card.green .stat-val{color:var(--green)}
+.stat-card.amber .stat-val{color:var(--amber)}.stat-card.red .stat-val{color:var(--red)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:20px}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface2);}
+.card-title{font-weight:600;font-size:0.95rem}.card-body{padding:20px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:0.75rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);padding:11px 16px;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:0.88rem;vertical-align:middle;}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.id-cell{font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--muted)}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:6px;font-size:0.75rem;font-weight:600;}
+.badge-gray{background:var(--bg);color:var(--muted)}
+.badge-male{background:#e8eeff;color:var(--accent)}
+.badge-female{background:#fce7f3;color:#be185d}
+.badge-cs{background:#e8eeff;color:var(--accent)}
+.badge-math{background:#e8f5ee;color:var(--green)}
+.badge-phy{background:#fdf0ef;color:var(--red)}
+.grade-A{background:#e8f5ee;color:var(--green)}
+.grade-B{background:#eef1fd;color:var(--accent)}
+.grade-C{background:#fef3e2;color:var(--amber)}
+.btn{padding:8px 16px;border-radius:var(--radius);font-size:0.88rem;font-weight:500;transition:all 0.15s;cursor:pointer;border:none;}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-dark)}
+.btn-secondary{background:#fff;color:var(--text);border:1.5px solid var(--border)}.btn-secondary:hover{border-color:var(--border2);background:var(--bg)}
+.btn-danger{background:var(--red-light);color:var(--red);border:1px solid #f5c6c2}.btn-danger:hover{background:#fce4e2}
+.btn-success{background:var(--green-light);color:var(--green);border:1px solid #b8e0cc}.btn-success:hover{background:#d4edde}
+.btn-sm{padding:5px 11px;font-size:0.8rem}
+.btn-icon{width:32px;height:32px;padding:0;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:1.5px solid var(--border);border-radius:8px;font-size:15px;cursor:pointer;transition:all 0.15s;}
+.btn-icon:hover{border-color:var(--border2);background:var(--bg)}
+.search-bar{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);padding:8px 14px;font-size:0.88rem;width:240px;}
+.search-bar input{background:none;border:none;flex:1;color:var(--text);font-size:0.88rem}
+.search-bar input::placeholder{color:var(--muted2)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-grid .full{grid-column:1/-1}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group label{font-size:0.83rem;font-weight:500;color:var(--text)}
+.form-group input,.form-group select,.form-group textarea{padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:0.9rem;background:#fff;color:var(--text);transition:border-color 0.2s;}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent)}
+.form-group select{cursor:pointer}.form-group textarea{resize:vertical;min-height:80px}
+.form-actions{display:flex;gap:10px;margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:var(--radius-lg);width:560px;max-width:95vw;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);animation:modalIn 0.2s ease;}
+@keyframes modalIn{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);}
+.modal-title{font-size:1.05rem;font-weight:700}
+.modal-close{width:30px;height:30px;border-radius:7px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:background 0.15s;}
+.modal-close:hover{background:var(--bg)}.modal-body{padding:24px;overflow-y:auto}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:2000;display:flex;flex-direction:column;gap:8px}
+.toast{background:#1a1916;color:#fff;padding:12px 18px;border-radius:10px;font-size:0.88rem;font-weight:500;box-shadow:var(--shadow-lg);animation:toastIn 0.3s ease;display:flex;align-items:center;gap:8px;min-width:220px;}
+.toast.success{background:var(--green)}.toast.error{background:var(--red)}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px}
+.tab{padding:10px 18px;font-size:0.88rem;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.15s;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}.tab:hover:not(.active){color:var(--text)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-state .empty-icon{font-size:2.5rem;margin-bottom:12px;opacity:0.5}
+.empty-state p{font-size:0.9rem}
+.profile-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;display:flex;gap:20px;align-items:flex-start;margin-bottom:20px;}
+.profile-avatar{width:64px;height:64px;border-radius:14px;background:var(--text);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;flex-shrink:0;}
+.profile-info .name{font-size:1.2rem;font-weight:700}.profile-info .sub{font-size:0.88rem;color:var(--muted);margin-top:3px}
+.profile-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.meta-item{font-size:0.82rem;color:var(--muted);background:var(--bg);padding:4px 10px;border-radius:6px}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.info-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;transition:box-shadow 0.2s,transform 0.2s;}
+.info-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.info-card-title{font-weight:600;font-size:0.95rem;margin-bottom:6px}.info-card-sub{font-size:0.83rem;color:var(--muted)}
+.report-section{margin-bottom:32px}.report-title{font-size:1rem;font-weight:600;margin-bottom:14px;color:var(--text)}
+.bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.bar-label{font-size:0.85rem;width:160px;flex-shrink:0;color:var(--text)}
+.bar-track{flex:1;height:10px;background:var(--bg);border-radius:20px;overflow:hidden}
+.bar-fill{height:100%;border-radius:20px;transition:width 0.8s ease}
+.bar-val{font-size:0.82rem;font-family:'JetBrains Mono',monospace;color:var(--muted);width:30px;text-align:right}
+@media(max-width:768px){.sidebar{display:none}.form-grid{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr 1fr}}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div id="login-page">
+  <div class="login-card">
+    <div class="login-logo"><div class="login-logo-icon">S</div><span class="login-logo-text">StudentDB</span></div>
+    <div class="login-title">Welcome back</div>
+    <div class="login-sub">Sign in to your account to continue</div>
+    <div class="role-tabs">
+      <div class="role-tab active" onclick="selectRole('admin',this)">Admin</div>
+      <div class="role-tab" onclick="selectRole('student',this)">Student</div>
+      <div class="role-tab" onclick="selectRole('faculty',this)">Faculty</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input class="form-input" type="text" id="login-user" placeholder="Enter username" value="admin">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" type="password" id="login-pass" placeholder="Enter password" value="admin123">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-hint">
+      <strong>Admin:</strong> admin / admin123<br>
+      <strong>Student:</strong> student / student123<br>
+      <strong>Faculty:</strong> faculty / faculty123
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo"><div class="topbar-logo-icon">S</div>StudentDB</div>
+    <div class="topbar-divider"></div>
+    <span class="topbar-role-badge" id="role-badge">Admin</span>
+    <div class="topbar-user">
+      <div class="user-avatar" id="user-avatar">A</div>
+      <span id="user-name" style="font-weight:500">Admin</span>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="app-body">
+    <nav class="sidebar" id="sidebar">
+      <div id="nav-admin" style="display:none">
+        <div class="nav-section-label">Overview</div>
+        <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">⊞</span>Dashboard</div>
+        <div class="nav-section-label">Manage</div>
+        <div class="nav-item" onclick="showPage('students',this)"><span class="nav-icon">◉</span>Students</div>
+        <div class="nav-item" onclick="showPage('faculty',this)"><span class="nav-icon">◉</span>Faculty</div>
+        <div class="nav-item" onclick="showPage('departments',this)"><span class="nav-icon">◉</span>Departments</div>
+        <div class="nav-item" onclick="showPage('courses',this)"><span class="nav-icon">◉</span>Courses</div>
+        <div class="nav-item" onclick="showPage('enrollments',this)"><span class="nav-icon">◉</span>Enrollments</div>
+        <div class="nav-item" onclick="showPage('grades',this)"><span class="nav-icon">◉</span>Grades</div>
+        <div class="nav-section-label">Insights</div>
+        <div class="nav-item" onclick="showPage('reports',this)"><span class="nav-icon">◈</span>Reports</div>
+        <div class="nav-item" onclick="showPage('search',this)"><span class="nav-icon">◈</span>Search</div>
+      </div>
+      <div id="nav-student" style="display:none">
+        <div class="nav-section-label">My Profile</div>
+        <div class="nav-item active" onclick="showPage('my-profile',this)"><span class="nav-icon">◉</span>My Profile</div>
+        <div class="nav-item" onclick="showPage('my-courses',this)"><span class="nav-icon">◉</span>My Courses</div>
+        <div class="nav-item" onclick="showPage('my-grades',this)"><span class="nav-icon">◉</span>My Grades</div>
+        <div class="nav-item" onclick="showPage('my-dept',this)"><span class="nav-icon">◉</span>Department Info</div>
+      </div>
+      <div id="nav-faculty" style="display:none">
+        <div class="nav-section-label">My Work</div>
+        <div class="nav-item active" onclick="showPage('faculty-dashboard',this)"><span class="nav-icon">⊞</span>Dashboard</div>
+        <div class="nav-item" onclick="showPage('dept-students',this)"><span class="nav-icon">◉</span>Dept Students</div>
+      </div>
+    </nav>
+
+    <main class="main-content">
+
+      <!-- ADMIN: DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-head"><div><div class="page-title">Dashboard</div><div class="page-sub">Student Information System overview</div></div></div>
+        <div class="stats-row" id="dash-stats"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div class="card"><div class="card-header"><span class="card-title">Recent Students</span></div>
+            <table><thead><tr><th>Name</th><th>Dept</th><th>Status</th></tr></thead><tbody id="dash-recent-students"></tbody></table></div>
+          <div class="card"><div class="card-header"><span class="card-title">Department Summary</span></div>
+            <div class="card-body" id="dash-dept-bars"></div></div>
+        </div>
+        <div class="card" style="margin-top:20px"><div class="card-header"><span class="card-title">Recent Enrollments</span></div>
+          <table><thead><tr><th>Student</th><th>Course</th><th>Semester</th><th>Year</th></tr></thead><tbody id="dash-recent-enrollments"></tbody></table></div>
+      </div>
+
+      <!-- ADMIN: STUDENTS -->
+      <div class="page" id="page-students">
+        <div class="page-head">
+          <div><div class="page-title">Students</div><div class="page-sub">Manage all student records</div></div>
+          <div class="page-actions">
+            <div class="search-bar"><span>🔍</span><input type="text" placeholder="Search students..." oninput="filterStudents(this.value)"></div>
+            <button class="btn btn-primary" onclick="openAddStudent()">+ Add Student</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">All Students <span class="badge badge-gray" id="students-count"></span></span></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>ID</th><th>Name</th><th>DOB</th><th>Gender</th><th>Phone</th><th>Email</th><th>Dept</th><th>Actions</th></tr></thead>
+            <tbody id="students-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ADMIN: FACULTY -->
+      <div class="page" id="page-faculty">
+        <div class="page-head">
+          <div><div class="page-title">Faculty</div><div class="page-sub">Manage faculty members</div></div>
+          <div class="page-actions"><button class="btn btn-primary" onclick="openAddFaculty()">+ Add Faculty</button></div>
+        </div>
+        <div class="cards-grid" id="faculty-grid"></div>
+      </div>
+
+      <!-- ADMIN: DEPARTMENTS -->
+      <div class="page" id="page-departments">
+        <div class="page-head">
+          <div><div class="page-title">Departments</div><div class="page-sub">Manage academic departments</div></div>
+          <div class="page-actions"><button class="btn btn-primary" onclick="openAddDept()">+ Add Department</button></div>
+        </div>
+        <div class="cards-grid" id="dept-grid"></div>
+      </div>
+
+      <!-- ADMIN: COURSES -->
+      <div class="page" id="page-courses">
+        <div class="page-head">
+          <div><div class="page-title">Courses</div><div class="page-sub">Manage course catalog</div></div>
+          <div class="page-actions"><button class="btn btn-primary" onclick="openAddCourse()">+ Add Course</button></div>
+        </div>
+        <div class="card"><div class="card-header"><span class="card-title">All Courses</span></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>ID</th><th>Course Name</th><th>Credits</th><th>Department</th><th>Enrolled</th><th>Actions</th></tr></thead>
+            <tbody id="courses-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ADMIN: ENROLLMENTS -->
+      <div class="page" id="page-enrollments">
+        <div class="page-head">
+          <div><div class="page-title">Enrollments</div><div class="page-sub">Enroll students in courses</div></div>
+          <div class="page-actions"><button class="btn btn-primary" onclick="openAddEnrollment()">+ Enroll Student</button></div>
+        </div>
+        <div class="card"><div class="card-header"><span class="card-title">Enrollment Records</span></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>ID</th><th>Student</th><th>Course</th><th>Semester</th><th>Year</th><th>Actions</th></tr></thead>
+            <tbody id="enrollments-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ADMIN: GRADES -->
+      <div class="page" id="page-grades">
+        <div class="page-head">
+          <div><div class="page-title">Grades</div><div class="page-sub">Assign and manage student grades</div></div>
+          <div class="page-actions"><button class="btn btn-primary" onclick="openAddGrade()">+ Assign Grade</button></div>
+        </div>
+        <div class="card"><div class="card-header"><span class="card-title">Grade Records</span></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>ID</th><th>Student</th><th>Course</th><th>Grade</th><th>GPA Points</th><th>Actions</th></tr></thead>
+            <tbody id="grades-tbody"></tbody>
+          </table></div>
+        </div>
+        <div class="card" style="margin-top:20px">
+          <div class="card-header"><span class="card-title">GPA Summary</span></div>
+          <div class="card-body" id="gpa-bars"></div>
+        </div>
+      </div>
+
+      <!-- ADMIN: REPORTS -->
+      <div class="page" id="page-reports">
+        <div class="page-head"><div><div class="page-title">Reports</div><div class="page-sub">Analytics and statistics</div></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div class="card"><div class="card-header"><span class="card-title">Students per Department</span></div><div class="card-body" id="rep-students-dept"></div></div>
+          <div class="card"><div class="card-header"><span class="card-title">Faculty per Department</span></div><div class="card-body" id="rep-faculty-dept"></div></div>
+          <div class="card"><div class="card-header"><span class="card-title">Top Performing Students</span></div>
+            <div class="table-wrap"><table><thead><tr><th>Rank</th><th>Student</th><th>GPA</th></tr></thead><tbody id="rep-top-students"></tbody></table></div></div>
+          <div class="card"><div class="card-header"><span class="card-title">Enrollment Stats</span></div><div class="card-body" id="rep-enrollment-stats"></div></div>
+        </div>
+      </div>
+
+      <!-- ADMIN: SEARCH -->
+      <div class="page" id="page-search">
+        <div class="page-head"><div><div class="page-title">Search</div><div class="page-sub">Find students, courses, faculty</div></div></div>
+        <div class="card" style="margin-bottom:20px"><div class="card-body">
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px"><input class="form-input" type="text" id="global-search" placeholder="Search by name, ID, email..." oninput="globalSearch(this.value)" style="width:100%"></div>
+            <select id="search-type" style="padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--radius);background:#fff;font-family:inherit;font-size:0.9rem">
+              <option>All</option><option>Students</option><option>Faculty</option><option>Courses</option>
+            </select>
+          </div>
+        </div></div>
+        <div id="search-results"><div class="card"><div class="card-header"><span class="card-title">Search Results</span></div>
+          <div class="card-body empty-state"><div class="empty-icon">🔍</div><p>Type something above to search</p></div></div></div>
+      </div>
+
+      <!-- STUDENT: MY PROFILE -->
+      <div class="page" id="page-my-profile">
+        <div class="page-head"><div><div class="page-title">My Profile</div><div class="page-sub">Your student information</div></div></div>
+        <div id="my-profile-content"></div>
+      </div>
+
+      <!-- STUDENT: MY COURSES -->
+      <div class="page" id="page-my-courses">
+        <div class="page-head"><div><div class="page-title">My Courses</div><div class="page-sub">Courses you're enrolled in</div></div></div>
+        <div class="cards-grid" id="my-courses-grid"></div>
+      </div>
+
+      <!-- STUDENT: MY GRADES -->
+      <div class="page" id="page-my-grades">
+        <div class="page-head"><div><div class="page-title">My Grades</div><div class="page-sub">Academic performance</div></div></div>
+        <div class="stats-row" id="my-grades-stats"></div>
+        <div class="card"><div class="card-header"><span class="card-title">Mark Sheet</span></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Course</th><th>Credits</th><th>Grade</th><th>Grade Points</th><th>Weighted</th></tr></thead>
+            <tbody id="my-grades-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- STUDENT: DEPT INFO -->
+      <div class="page" id="page-my-dept">
+        <div class="page-head"><div><div class="page-title">Department Info</div></div></div>
+        <div id="my-dept-content"></div>
+      </div>
+
+      <!-- FACULTY: DASHBOARD -->
+      <div class="page" id="page-faculty-dashboard">
+        <div class="page-head"><div><div class="page-title">Faculty Dashboard</div></div></div>
+        <div class="stats-row" id="faculty-dash-stats"></div>
+        <div id="faculty-profile-content"></div>
+      </div>
+
+      <!-- FACULTY: DEPT STUDENTS -->
+      <div class="page" id="page-dept-students">
+        <div class="page-head"><div><div class="page-title" id="dept-students-title">Department Students</div></div></div>
+        <div class="card"><div class="card-header"><span class="card-title">Students</span></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Gender</th></tr></thead>
+            <tbody id="dept-students-tbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- MODALS -->
+<!-- Add/Edit Student -->
+<div class="modal-overlay" id="add-student-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Add New Student</span><button class="modal-close" onclick="closeModal('add-student-modal')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="s-edit-id">
+      <div class="form-grid">
+        <div class="form-group"><label>Full Name</label><input type="text" id="s-name" placeholder="e.g. Priya Sharma"></div>
+        <div class="form-group"><label>Date of Birth</label><input type="date" id="s-dob"></div>
+        <div class="form-group"><label>Gender</label><select id="s-gender"><option>Male</option><option>Female</option><option>Other</option></select></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="s-phone" placeholder="10-digit number"></div>
+        <div class="form-group full"><label>Email</label><input type="email" id="s-email" placeholder="student@email.com"></div>
+        <div class="form-group full"><label>Department</label><select id="s-dept"></select></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('add-student-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStudent()">Save Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Faculty -->
+<div class="modal-overlay" id="add-faculty-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Add Faculty Member</span><button class="modal-close" onclick="closeModal('add-faculty-modal')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="f-edit-id">
+      <div class="form-grid">
+        <div class="form-group full"><label>Full Name</label><input type="text" id="f-name" placeholder="e.g. Dr. Gupta"></div>
+        <div class="form-group full"><label>Email</label><input type="email" id="f-email" placeholder="faculty@university.edu"></div>
+        <div class="form-group full"><label>Department</label><select id="f-dept"></select></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('add-faculty-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveFaculty()">Save Faculty</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Department -->
+<div class="modal-overlay" id="add-dept-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Add Department</span><button class="modal-close" onclick="closeModal('add-dept-modal')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="d-edit-id">
+      <div class="form-grid">
+        <div class="form-group full"><label>Department Name</label><input type="text" id="d-name" placeholder="e.g. Chemistry"></div>
+        <div class="form-group full"><label>Head of Department (HOD)</label><input type="text" id="d-hod" placeholder="e.g. Dr. Verma"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('add-dept-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDept()">Save Department</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Course -->
+<div class="modal-overlay" id="add-course-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Add Course</span><button class="modal-close" onclick="closeModal('add-course-modal')">×</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="c-edit-id">
+      <div class="form-grid">
+        <div class="form-group full"><label>Course Name</label><input type="text" id="c-name" placeholder="e.g. Operating Systems"></div>
+        <div class="form-group"><label>Credits</label><input type="number" id="c-credits" placeholder="e.g. 3" min="1" max="6"></div>
+        <div class="form-group"><label>Department</label><select id="c-dept"></select></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('add-course-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCourse()">Save Course</button>
+    </div>
+  </div>
+</div>
+
+<!-- Enroll Student -->
+<div class="modal-overlay" id="add-enrollment-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Enroll Student</span><button class="modal-close" onclick="closeModal('add-enrollment-modal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Student</label><select id="enr-student"></select></div>
+        <div class="form-group"><label>Course</label><select id="enr-course"></select></div>
+        <div class="form-group"><label>Semester</label><select id="enr-semester"><option>Fall</option><option>Spring</option><option>Summer</option></select></div>
+        <div class="form-group"><label>Year</label><input type="number" id="enr-year" value="2024"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('add-enrollment-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEnrollment()">Enroll</button>
+    </div>
+  </div>
+</div>
+
+<!-- Assign Grade -->
+<div class="modal-overlay" id="add-grade-modal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">Assign Grade</span><button class="modal-close" onclick="closeModal('add-grade-modal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Student</label><select id="g-student"></select></div>
+        <div class="form-group"><label>Course</label><select id="g-course"></select></div>
+        <div class="form-group full"><label>Grade</label>
+          <select id="g-grade"><option value="">Select grade</option><option>A</option><option>A-</option><option>B+</option><option>B</option><option>B-</option><option>C+</option><option>C</option><option>C-</option><option>D</option><option>F</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('add-grade-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveGrade()">Save Grade</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal" style="width:400px">
+    <div class="modal-header"><span class="modal-title">Confirm Delete</span><button class="modal-close" onclick="closeModal('delete-modal')">×</button></div>
+    <div class="modal-body">
+      <p style="font-size:0.95rem">Are you sure you want to delete <strong id="delete-name"></strong>?</p>
+      <p style="font-size:0.85rem;color:var(--red);margin-top:8px">⚠️ This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('delete-modal')">Cancel</button>
+      <button class="btn" style="background:var(--red);color:#fff" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// =============================================================
+// CONFIG — backend URL
+// =============================================================
+const API_CANDIDATES = [
+  'http://127.0.0.1:5000',
+  'http://127.0.0.1:5001',
+  'http://localhost:5000',
+  'http://localhost:5001'
+];
+let API = null;
+const CONNECT_RETRY_MS = 1000;
+const CONNECT_TIMEOUT_MS = 30000;
+
+// =============================================================
+// IN-MEMORY CACHE — loaded fresh from backend on every page visit
+// =============================================================
+let DB = { departments:[], students:[], faculty:[], courses:[], enrollments:[], grades:[] };
+
+const GPA_MAP = {'A':4.0,'A-':3.7,'B+':3.3,'B':3.0,'B-':2.7,'C+':2.3,'C':2.0,'C-':1.7,'D':1.0,'F':0.0};
+
+// =============================================================
+// API HELPERS
+// =============================================================
+async function apiFetch(path, options={}) {
+  if (!API) {
+    API = await resolveApiBase();
+  }
+  try {
+    const res = await fetch(API + path, {
+      headers: { 'Content-Type': 'application/json' },
+      ...options
+    });
+    const text = await res.text();
+    let data = {};
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch (_) {
+      data = { message: text || 'Request failed' };
+    }
+    if (!res.ok) throw new Error(data.message || 'Request failed');
+    return data;
+  } catch(e) {
+    showToast('Backend error: ' + e.message, 'error');
+    throw e;
+  }
+}
+
+async function resolveApiBase() {
+  const deadline = Date.now() + CONNECT_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    for (const base of API_CANDIDATES) {
+      try {
+        const res = await fetch(base + '/students', { cache: 'no-store' });
+        const contentType = res.headers.get('content-type') || '';
+        if (!res.ok || !contentType.includes('application/json')) continue;
+        await res.clone().json();
+        return base;
+      } catch (_) {}
+    }
+    showToast('Starting Flask backend... waiting for connection.', '');
+    await new Promise(resolve => setTimeout(resolve, CONNECT_RETRY_MS));
+  }
+  throw new Error('Could not connect to Flask backend after waiting. Start app.py and refresh.');
+}
+
+// Load all data from backend into DB cache
+async function loadAll() {
+  const [depts, students, faculty, courses, enrollments, grades] = await Promise.all([
+    apiFetch('/departments'),
+    apiFetch('/students'),
+    apiFetch('/faculty'),
+    apiFetch('/courses'),
+    apiFetch('/enrollments'),
+    apiFetch('/grades'),
+  ]);
+  // Normalize keys to match original frontend expectations
+  DB.departments = depts.map(d => ({ id: d.Dept_ID, name: d.Dept_Name, hod: d.HOD }));
+  DB.students    = students.map(s => ({ id: s.Student_ID, name: s.Name, dob: s.DOB ? s.DOB.split('T')[0] : '', gender: s.Gender, phone: s.Phone, email: s.Email, deptId: s.Dept_ID }));
+  DB.faculty     = faculty.map(f => ({ id: f.Faculty_ID, name: f.Faculty_Name, deptId: f.Dept_ID, email: f.Email }));
+  DB.courses     = courses.map(c => ({ id: c.Course_ID, name: c.Course_Name, credits: c.Credits, deptId: c.Dept_ID }));
+  DB.enrollments = enrollments.map(e => ({ id: e.Enrollment_ID, studentId: e.Student_ID, courseId: e.Course_ID, semester: e.Semester, year: e.Year }));
+  DB.grades      = grades.map(g => ({ id: g.Grade_ID, studentId: g.Student_ID, courseId: g.Course_ID, grade: g.Grade }));
+}
+
+// =============================================================
+// HELPERS
+// =============================================================
+function deptName(id) { const d = DB.departments.find(d=>d.id===id); return d ? d.name : '—'; }
+function deptBadge(id) {
+  const colors = {1:'badge-cs',2:'badge-math',3:'badge-phy'};
+  const d = DB.departments.find(x=>x.id===id);
+  const label = d ? d.name.substring(0,4) : '?';
+  return `<span class="badge ${colors[id]||'badge-gray'}">${label}</span>`;
+}
+function gradeBadge(g) {
+  const cls = g&&g.startsWith('A') ? 'grade-A' : g&&g.startsWith('B') ? 'grade-B' : 'grade-C';
+  return `<span class="badge ${cls}">${g||'—'}</span>`;
+}
+function calcGPA(studentId) {
+  const sg = DB.grades.filter(g=>g.studentId===studentId);
+  if (!sg.length) return null;
+  let totalPts=0, totalCreds=0;
+  sg.forEach(g=>{
+    const course = DB.courses.find(c=>c.id===g.courseId);
+    const pts = GPA_MAP[g.grade]??0;
+    const cr  = course ? course.credits : 3;
+    totalPts += pts*cr; totalCreds += cr;
+  });
+  return totalCreds ? (totalPts/totalCreds).toFixed(2) : null;
+}
+function populateSelect(elId, arr, valKey, labelKey, selectedVal=null, labelFn=null) {
+  const sel = document.getElementById(elId);
+  if (!sel) return;
+  sel.innerHTML = arr.map(item=>{
+    const label = labelFn ? labelFn(item) : item[labelKey];
+    const sel2  = String(item[valKey])===String(selectedVal) ? 'selected' : '';
+    return `<option value="${item[valKey]}" ${sel2}>${label}</option>`;
+  }).join('');
+}
+
+// =============================================================
+// AUTH
+// =============================================================
+let currentRole = 'admin';
+let currentUser = {};
+let selectedLoginRole = 'admin';
+
+function selectRole(role, el) {
+  selectedLoginRole = role;
+  document.querySelectorAll('.role-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const creds = {admin:['admin','admin123'], student:['student','student123'], faculty:['faculty','faculty123']};
+  document.getElementById('login-user').value = creds[role][0];
+  document.getElementById('login-pass').value = creds[role][1];
+}
+
+async function doLogin() {
+  const username = document.getElementById('login-user').value.trim();
+  const password = document.getElementById('login-pass').value.trim();
+  try {
+    const data = await apiFetch('/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password })
+    });
+    if (data.success) {
+      currentRole = data.role;
+      currentUser = { name: username, avatar: username[0].toUpperCase(), role: data.role };
+      await launchApp();
+    } else {
+      showToast('Invalid credentials', 'error');
+    }
+  } catch(e) { /* already handled in apiFetch */ }
+}
+
+async function launchApp() {
+  showToast('Loading data from database...', '');
+  await loadAll();
+  document.getElementById('login-page').style.display = 'none';
+  const app = document.getElementById('app');
+  app.className = 'visible role-' + currentRole;
+  document.getElementById('user-name').textContent   = currentUser.name;
+  document.getElementById('user-avatar').textContent = currentUser.avatar;
+  document.getElementById('role-badge').textContent  = currentRole[0].toUpperCase()+currentRole.slice(1);
+  ['admin','student','faculty'].forEach(r => {
+    document.getElementById('nav-'+r).style.display = r===currentRole ? 'block' : 'none';
+  });
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if (currentRole==='admin') {
+    renderDashboard();
+    document.getElementById('page-dashboard').classList.add('active');
+    document.querySelector('#nav-admin .nav-item').classList.add('active');
+  } else if (currentRole==='student') {
+    renderMyProfile();
+    document.getElementById('page-my-profile').classList.add('active');
+    document.querySelector('#nav-student .nav-item').classList.add('active');
+  } else {
+    renderFacultyDashboard();
+    document.getElementById('page-faculty-dashboard').classList.add('active');
+    document.querySelector('#nav-faculty .nav-item').classList.add('active');
+  }
+}
+
+function doLogout() {
+  document.getElementById('app').className = '';
+  document.getElementById('login-page').style.display = 'flex';
+  DB = { departments:[], students:[], faculty:[], courses:[], enrollments:[], grades:[] };
+}
+
+// =============================================================
+// NAVIGATION
+// =============================================================
+async function showPage(pageId, navEl) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+pageId).classList.add('active');
+  if (navEl) {
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    navEl.classList.add('active');
+  }
+  await loadAll(); // always refresh from DB
+  const renders = {
+    'dashboard':         renderDashboard,
+    'students':          renderStudents,
+    'faculty':           renderFaculty,
+    'departments':       renderDepartments,
+    'courses':           renderCourses,
+    'enrollments':       renderEnrollments,
+    'grades':            renderGrades,
+    'reports':           renderReports,
+    'my-profile':        renderMyProfile,
+    'my-courses':        renderMyCourses,
+    'my-grades':         renderMyGrades,
+    'my-dept':           renderMyDept,
+    'faculty-dashboard': renderFacultyDashboard,
+    'dept-students':     renderDeptStudents,
+  };
+  if (renders[pageId]) renders[pageId]();
+}
+
+// =============================================================
+// RENDER: DASHBOARD
+// =============================================================
+function renderDashboard() {
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card blue"><div class="stat-val">${DB.students.length}</div><div class="stat-lbl">Total Students</div></div>
+    <div class="stat-card green"><div class="stat-val">${DB.faculty.length}</div><div class="stat-lbl">Faculty Members</div></div>
+    <div class="stat-card amber"><div class="stat-val">${DB.departments.length}</div><div class="stat-lbl">Departments</div></div>
+    <div class="stat-card red"><div class="stat-val">${DB.courses.length}</div><div class="stat-lbl">Active Courses</div></div>
+    <div class="stat-card blue"><div class="stat-val">${DB.enrollments.length}</div><div class="stat-lbl">Enrollments</div></div>
+    <div class="stat-card green"><div class="stat-val">${DB.grades.length}</div><div class="stat-lbl">Grades Recorded</div></div>`;
+
+  const stuRows = DB.students.slice(-5).reverse().map(s=>
+    `<tr><td>${s.name}</td><td>${deptBadge(s.deptId)}</td><td><span class="badge badge-gray">Active</span></td></tr>`).join('');
+  document.getElementById('dash-recent-students').innerHTML = stuRows || '<tr><td colspan="3" style="text-align:center;color:var(--muted)">No students</td></tr>';
+
+  const enrRows = DB.enrollments.slice(-5).reverse().map(e=>{
+    const s=DB.students.find(x=>x.id===e.studentId), c=DB.courses.find(x=>x.id===e.courseId);
+    return `<tr><td>${s?s.name:'?'}</td><td>${c?c.name:'?'}</td><td>${e.semester}</td><td>${e.year}</td></tr>`;
+  }).join('');
+  document.getElementById('dash-recent-enrollments').innerHTML = enrRows || '<tr><td colspan="4" style="text-align:center;color:var(--muted)">No enrollments</td></tr>';
+
+  const maxS = Math.max(...DB.departments.map(d=>DB.students.filter(s=>s.deptId===d.id).length), 1);
+  document.getElementById('dash-dept-bars').innerHTML = DB.departments.map(d=>{
+    const cnt = DB.students.filter(s=>s.deptId===d.id).length;
+    return `<div class="bar-row"><span class="bar-label">${d.name}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/maxS*100)}%;background:var(--accent)"></div></div><span class="bar-val">${cnt}</span></div>`;
+  }).join('');
+}
+
+// =============================================================
+// RENDER: STUDENTS
+// =============================================================
+let _studentFilter = '';
+function filterStudents(q) { _studentFilter = q; renderStudents(); }
+
+function renderStudents() {
+  const q = _studentFilter.toLowerCase();
+  const rows = DB.students.filter(s=>
+    !q || s.name.toLowerCase().includes(q) || String(s.id).includes(q) ||
+    (s.email||'').toLowerCase().includes(q) || deptName(s.deptId).toLowerCase().includes(q)
+  ).map(s=>`
+    <tr>
+      <td class="id-cell">${s.id}</td>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.dob||'—'}</td>
+      <td><span class="badge ${s.gender==='Male'?'badge-male':'badge-female'}">${s.gender||'—'}</span></td>
+      <td>${s.phone||'—'}</td>
+      <td>${s.email||'—'}</td>
+      <td>${deptBadge(s.deptId)}</td>
+      <td>
+        <button class="btn-icon" onclick="openEditStudent(${s.id})" title="Edit">✏️</button>
+        <button class="btn-icon" onclick="deleteConfirm('student',${s.id},'${s.name}')" title="Delete">🗑️</button>
+      </td>
+    </tr>`).join('');
+  document.getElementById('students-tbody').innerHTML = rows || `<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--muted)">No students found</td></tr>`;
+  document.getElementById('students-count').textContent = `${DB.students.length} records`;
+}
+
+function openAddStudent() {
+  document.querySelector('#add-student-modal .modal-title').textContent = 'Add New Student';
+  document.getElementById('s-edit-id').value = '';
+  document.getElementById('s-name').value = '';
+  document.getElementById('s-dob').value = '';
+  document.getElementById('s-phone').value = '';
+  document.getElementById('s-email').value = '';
+  populateSelect('s-dept', DB.departments, 'id', 'name');
+  openModal('add-student-modal');
+}
+
+function openEditStudent(id) {
+  const s = DB.students.find(x=>x.id===id);
+  if (!s) return;
+  document.querySelector('#add-student-modal .modal-title').textContent = 'Edit Student';
+  document.getElementById('s-edit-id').value = id;
+  document.getElementById('s-name').value    = s.name;
+  document.getElementById('s-dob').value     = s.dob;
+  document.getElementById('s-gender').value  = s.gender;
+  document.getElementById('s-phone').value   = s.phone;
+  document.getElementById('s-email').value   = s.email;
+  populateSelect('s-dept', DB.departments, 'id', 'name', s.deptId);
+  openModal('add-student-modal');
+}
+
+async function saveStudent() {
+  const editId = document.getElementById('s-edit-id').value;
+  const payload = {
+    Name:    document.getElementById('s-name').value.trim(),
+    DOB:     document.getElementById('s-dob').value,
+    Gender:  document.getElementById('s-gender').value,
+    Phone:   document.getElementById('s-phone').value.trim(),
+    Email:   document.getElementById('s-email').value.trim(),
+    Dept_ID: parseInt(document.getElementById('s-dept').value),
+  };
+  if (!payload.Name) { showToast('Name is required', 'error'); return; }
+  try {
+    if (editId) {
+      await apiFetch(`/students/${editId}`, { method:'PUT', body: JSON.stringify(payload) });
+      showToast('Student updated!', 'success');
+    } else {
+      await apiFetch('/students', { method:'POST', body: JSON.stringify(payload) });
+      showToast('Student added!', 'success');
+    }
+    closeModal('add-student-modal');
+    await loadAll();
+    renderStudents();
+  } catch(e) {}
+}
+
+// =============================================================
+// RENDER: FACULTY
+// =============================================================
+function renderFaculty() {
+  const colors = ['#e8eeff','#e8f5ee','#fdf0ef','#fef3e2'];
+  const tcols  = ['var(--accent)','var(--green)','var(--red)','var(--amber)'];
+  document.getElementById('faculty-grid').innerHTML = DB.faculty.map((f,i)=>`
+    <div class="info-card">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+        <div style="width:48px;height:48px;border-radius:12px;background:${colors[i%4]};color:${tcols[i%4]};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem">${f.name[0]}</div>
+        <div><div class="info-card-title">${f.name}</div><div class="info-card-sub">Faculty ID: ${f.id}</div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:0.83rem;color:var(--muted)">📧 ${f.email||'—'}</div>
+        <div style="font-size:0.83rem;color:var(--muted)">🏫 ${deptBadge(f.deptId)}</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn btn-secondary btn-sm" onclick="openEditFaculty(${f.id})">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteConfirm('faculty',${f.id},'${f.name}')">Delete</button>
+      </div>
+    </div>`).join('') || '<p style="color:var(--muted);padding:20px">No faculty records</p>';
+}
+
+function openAddFaculty() {
+  document.querySelector('#add-faculty-modal .modal-title').textContent = 'Add Faculty Member';
+  document.getElementById('f-edit-id').value = '';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-email').value = '';
+  populateSelect('f-dept', DB.departments, 'id', 'name');
+  openModal('add-faculty-modal');
+}
+
+function openEditFaculty(id) {
+  const f = DB.faculty.find(x=>x.id===id);
+  if (!f) return;
+  document.querySelector('#add-faculty-modal .modal-title').textContent = 'Edit Faculty';
+  document.getElementById('f-edit-id').value = id;
+  document.getElementById('f-name').value    = f.name;
+  document.getElementById('f-email').value   = f.email;
+  populateSelect('f-dept', DB.departments, 'id', 'name', f.deptId);
+  openModal('add-faculty-modal');
+}
+
+async function saveFaculty() {
+  const editId = document.getElementById('f-edit-id').value;
+  const payload = {
+    Faculty_Name: document.getElementById('f-name').value.trim(),
+    Email:        document.getElementById('f-email').value.trim(),
+    Dept_ID:      parseInt(document.getElementById('f-dept').value),
+  };
+  if (!payload.Faculty_Name) { showToast('Name is required', 'error'); return; }
+  try {
+    if (editId) {
+      await apiFetch(`/faculty/${editId}`, { method:'PUT', body: JSON.stringify(payload) });
+      showToast('Faculty updated!', 'success');
+    } else {
+      await apiFetch('/faculty', { method:'POST', body: JSON.stringify(payload) });
+      showToast('Faculty added!', 'success');
+    }
+    closeModal('add-faculty-modal');
+    await loadAll(); renderFaculty();
+  } catch(e) {}
+}
+
+// =============================================================
+// RENDER: DEPARTMENTS
+// =============================================================
+function renderDepartments() {
+  const borderColors = ['var(--accent)','var(--green)','var(--red)','var(--amber)'];
+  document.getElementById('dept-grid').innerHTML = DB.departments.map((d,i)=>{
+    const stuCount = DB.students.filter(s=>s.deptId===d.id).length;
+    const facCount = DB.faculty.filter(f=>f.deptId===d.id).length;
+    const crsCount = DB.courses.filter(c=>c.deptId===d.id).length;
+    return `
+    <div class="info-card" style="border-left:3px solid ${borderColors[i%4]}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div class="info-card-title" style="font-size:1.05rem">${d.name}</div><div class="info-card-sub">Dept ID: ${d.id}</div></div>
+      </div>
+      <div style="margin-top:14px;font-size:0.85rem;color:var(--muted)">👤 HOD: <strong style="color:var(--text)">${d.hod||'—'}</strong></div>
+      <div style="margin-top:6px;font-size:0.85rem;color:var(--muted)">👨‍🎓 ${stuCount} Students &nbsp;|&nbsp; 👨‍🏫 ${facCount} Faculty &nbsp;|&nbsp; 📚 ${crsCount} Courses</div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn btn-secondary btn-sm" onclick="openEditDept(${d.id})">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteConfirm('department',${d.id},'${d.name}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openAddDept() {
+  document.querySelector('#add-dept-modal .modal-title').textContent = 'Add Department';
+  document.getElementById('d-edit-id').value = '';
+  document.getElementById('d-name').value = '';
+  document.getElementById('d-hod').value = '';
+  openModal('add-dept-modal');
+}
+
+function openEditDept(id) {
+  const d = DB.departments.find(x=>x.id===id);
+  if (!d) return;
+  document.querySelector('#add-dept-modal .modal-title').textContent = 'Edit Department';
+  document.getElementById('d-edit-id').value = id;
+  document.getElementById('d-name').value = d.name;
+  document.getElementById('d-hod').value  = d.hod;
+  openModal('add-dept-modal');
+}
+
+async function saveDept() {
+  const editId = document.getElementById('d-edit-id').value;
+  const payload = {
+    Dept_Name: document.getElementById('d-name').value.trim(),
+    HOD:       document.getElementById('d-hod').value.trim(),
+  };
+  if (!payload.Dept_Name) { showToast('Department name is required', 'error'); return; }
+  try {
+    if (editId) {
+      await apiFetch(`/departments/${editId}`, { method:'PUT', body: JSON.stringify(payload) });
+      showToast('Department updated!', 'success');
+    } else {
+      await apiFetch('/departments', { method:'POST', body: JSON.stringify(payload) });
+      showToast('Department added!', 'success');
+    }
+    closeModal('add-dept-modal');
+    await loadAll(); renderDepartments();
+  } catch(e) {}
+}
+
+// =============================================================
+// RENDER: COURSES
+// =============================================================
+function renderCourses() {
+  const rows = DB.courses.map(c=>{
+    const enrolled = DB.enrollments.filter(e=>e.courseId===c.id).length;
+    return `
+    <tr>
+      <td class="id-cell">${c.id}</td>
+      <td><strong>${c.name}</strong></td>
+      <td><span style="font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:600">${c.credits}</span></td>
+      <td>${deptBadge(c.deptId)}</td>
+      <td>${enrolled} student${enrolled!==1?'s':''}</td>
+      <td>
+        <button class="btn-icon" onclick="openEditCourse(${c.id})" title="Edit">✏️</button>
+        <button class="btn-icon" onclick="deleteConfirm('course',${c.id},'${c.name}')" title="Delete">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('courses-tbody').innerHTML = rows || `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">No courses</td></tr>`;
+}
+
+function openAddCourse() {
+  document.querySelector('#add-course-modal .modal-title').textContent = 'Add Course';
+  document.getElementById('c-edit-id').value = '';
+  document.getElementById('c-name').value = '';
+  document.getElementById('c-credits').value = '';
+  populateSelect('c-dept', DB.departments, 'id', 'name');
+  openModal('add-course-modal');
+}
+
+function openEditCourse(id) {
+  const c = DB.courses.find(x=>x.id===id);
+  if (!c) return;
+  document.querySelector('#add-course-modal .modal-title').textContent = 'Edit Course';
+  document.getElementById('c-edit-id').value  = id;
+  document.getElementById('c-name').value     = c.name;
+  document.getElementById('c-credits').value  = c.credits;
+  populateSelect('c-dept', DB.departments, 'id', 'name', c.deptId);
+  openModal('add-course-modal');
+}
+
+async function saveCourse() {
+  const editId = document.getElementById('c-edit-id').value;
+  const payload = {
+    Course_Name: document.getElementById('c-name').value.trim(),
+    Credits:     parseInt(document.getElementById('c-credits').value) || 3,
+    Dept_ID:     parseInt(document.getElementById('c-dept').value),
+  };
+  if (!payload.Course_Name) { showToast('Course name is required', 'error'); return; }
+  try {
+    if (editId) {
+      await apiFetch(`/courses/${editId}`, { method:'PUT', body: JSON.stringify(payload) });
+      showToast('Course updated!', 'success');
+    } else {
+      await apiFetch('/courses', { method:'POST', body: JSON.stringify(payload) });
+      showToast('Course added!', 'success');
+    }
+    closeModal('add-course-modal');
+    await loadAll(); renderCourses();
+  } catch(e) {}
+}
+
+// =============================================================
+// RENDER: ENROLLMENTS
+// =============================================================
+function renderEnrollments() {
+  const rows = DB.enrollments.map(e=>{
+    const s=DB.students.find(x=>x.id===e.studentId), c=DB.courses.find(x=>x.id===e.courseId);
+    return `
+    <tr>
+      <td class="id-cell">${e.id}</td>
+      <td>${s?s.name:'?'} <span style="color:var(--muted);font-size:0.8rem">(${e.studentId})</span></td>
+      <td>${c?c.name:'?'} <span style="color:var(--muted);font-size:0.8rem">(${e.courseId})</span></td>
+      <td>${e.semester}</td><td>${e.year}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="dropEnrollment(${e.id})">Drop</button></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('enrollments-tbody').innerHTML = rows || `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">No enrollments</td></tr>`;
+}
+
+function openAddEnrollment() {
+  populateSelect('enr-student', DB.students, 'id', 'name', null, s=>`${s.id} — ${s.name}`);
+  populateSelect('enr-course',  DB.courses,  'id', 'name', null, c=>`${c.id} — ${c.name}`);
+  openModal('add-enrollment-modal');
+}
+
+async function saveEnrollment() {
+  const payload = {
+    Student_ID: parseInt(document.getElementById('enr-student').value),
+    Course_ID:  parseInt(document.getElementById('enr-course').value),
+    Semester:   document.getElementById('enr-semester').value,
+    Year:       parseInt(document.getElementById('enr-year').value),
+  };
+  try {
+    await apiFetch('/enroll', { method:'POST', body: JSON.stringify(payload) });
+    showToast('Student enrolled!', 'success');
+    closeModal('add-enrollment-modal');
+    await loadAll(); renderEnrollments();
+  } catch(e) {}
+}
+
+async function dropEnrollment(id) {
+  const e = DB.enrollments.find(x=>x.id===id);
+  const s = DB.students.find(x=>x.id===e?.studentId);
+  const c = DB.courses.find(x=>x.id===e?.courseId);
+  document.getElementById('delete-name').textContent = `${s?s.name:'?'}'s enrollment in ${c?c.name:'?'}`;
+  pendingDelete = { type:'enrollment', id };
+  openModal('delete-modal');
+}
+
+// =============================================================
+// RENDER: GRADES
+// =============================================================
+function renderGrades() {
+  const rows = DB.grades.map(g=>{
+    const s=DB.students.find(x=>x.id===g.studentId), c=DB.courses.find(x=>x.id===g.courseId);
+    return `
+    <tr>
+      <td class="id-cell">${g.id}</td>
+      <td>${s?s.name:'?'}</td>
+      <td>${c?c.name:'?'}</td>
+      <td>${gradeBadge(g.grade)}</td>
+      <td>${GPA_MAP[g.grade]??'—'}</td>
+      <td>
+        <button class="btn-icon" onclick="openEditGrade(${g.id})" title="Edit">✏️</button>
+        <button class="btn-icon" onclick="deleteConfirm('grade',${g.id},'this grade')" title="Delete">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('grades-tbody').innerHTML = rows || `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)">No grades recorded</td></tr>`;
+
+  const bars = DB.students.map(s=>{
+    const gpa = calcGPA(s.id);
+    const pct = gpa ? Math.round((gpa/4)*100) : 0;
+    return `<div class="bar-row"><span class="bar-label">${s.name}</span><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--accent)"></div></div><span class="bar-val">${gpa??'N/A'}</span></div>`;
+  }).join('');
+  document.getElementById('gpa-bars').innerHTML = bars;
+}
+
+function openAddGrade() {
+  document.querySelector('#add-grade-modal .modal-title').textContent = 'Assign Grade';
+  document.getElementById('g-grade').value = '';
+  populateSelect('g-student', DB.students, 'id', 'name', null, s=>`${s.id} — ${s.name}`);
+  populateSelect('g-course',  DB.courses,  'id', 'name', null, c=>`${c.id} — ${c.name}`);
+  openModal('add-grade-modal');
+}
+
+function openEditGrade(id) {
+  const g = DB.grades.find(x=>x.id===id);
+  if (!g) return;
+  document.querySelector('#add-grade-modal .modal-title').textContent = 'Edit Grade';
+  populateSelect('g-student', DB.students, 'id', 'name', g.studentId, s=>`${s.id} — ${s.name}`);
+  populateSelect('g-course',  DB.courses,  'id', 'name', g.courseId,  c=>`${c.id} — ${c.name}`);
+  document.getElementById('g-grade').value = g.grade;
+  openModal('add-grade-modal');
+}
+
+async function saveGrade() {
+  const grade = document.getElementById('g-grade').value;
+  if (!grade) { showToast('Please select a grade', 'error'); return; }
+  const payload = {
+    Student_ID: parseInt(document.getElementById('g-student').value),
+    Course_ID:  parseInt(document.getElementById('g-course').value),
+    Grade:      grade,
+  };
+  try {
+    await apiFetch('/grades', { method:'POST', body: JSON.stringify(payload) });
+    showToast('Grade saved!', 'success');
+    closeModal('add-grade-modal');
+    await loadAll(); renderGrades();
+  } catch(e) {}
+}
+
+// =============================================================
+// RENDER: REPORTS
+// =============================================================
+function renderReports() {
+  const maxS = Math.max(...DB.departments.map(d=>DB.students.filter(s=>s.deptId===d.id).length), 1);
+  const maxF = Math.max(...DB.departments.map(d=>DB.faculty.filter(f=>f.deptId===d.id).length), 1);
+  const maxE = Math.max(...DB.courses.map(c=>DB.enrollments.filter(e=>e.courseId===c.id).length), 1);
+
+  document.getElementById('rep-students-dept').innerHTML = DB.departments.map(d=>{
+    const n = DB.students.filter(s=>s.deptId===d.id).length;
+    return `<div class="bar-row"><span class="bar-label">${d.name}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/maxS*100)}%;background:var(--accent)"></div></div><span class="bar-val">${n}</span></div>`;
+  }).join('');
+
+  document.getElementById('rep-faculty-dept').innerHTML = DB.departments.map(d=>{
+    const n = DB.faculty.filter(f=>f.deptId===d.id).length;
+    return `<div class="bar-row"><span class="bar-label">${d.name}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/maxF*100)}%;background:var(--green)"></div></div><span class="bar-val">${n}</span></div>`;
+  }).join('');
+
+  document.getElementById('rep-enrollment-stats').innerHTML = DB.courses.map(c=>{
+    const n = DB.enrollments.filter(e=>e.courseId===c.id).length;
+    return `<div class="bar-row"><span class="bar-label">${c.name}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/maxE*100)}%;background:var(--amber)"></div></div><span class="bar-val">${n}</span></div>`;
+  }).join('');
+
+  const ranked = DB.students.map(s=>({ s, gpa: calcGPA(s.id) })).sort((a,b)=>(b.gpa||0)-(a.gpa||0));
+  const medals = ['🥇','🥈','🥉'];
+  document.getElementById('rep-top-students').innerHTML = ranked.map((r,i)=>
+    `<tr><td>${medals[i]||i+1}</td><td>${r.s.name}</td><td style="font-family:'JetBrains Mono',monospace">${r.gpa??'N/A'}</td></tr>`).join('');
+}
+
+// =============================================================
+// RENDER: STUDENT VIEWS
+// =============================================================
+function renderMyProfile() {
+  const s = DB.students[0]; // logged in as 'student' role — show first student
+  if (!s) { document.getElementById('my-profile-content').innerHTML = '<p style="color:var(--muted)">No student data found.</p>'; return; }
+  const gpa = calcGPA(s.id);
+  const myEnr = DB.enrollments.filter(e=>e.studentId===s.id);
+  const totalCreds = myEnr.reduce((sum,e)=>{ const c=DB.courses.find(x=>x.id===e.courseId); return sum+(c?c.credits:0); }, 0);
+  document.getElementById('my-profile-content').innerHTML = `
+    <div class="profile-card">
+      <div class="profile-avatar">${s.name[0]}</div>
+      <div class="profile-info">
+        <div class="name">${s.name}</div>
+        <div class="sub">Student ID: ${s.id}</div>
+        <div class="profile-meta">
+          <span class="meta-item">📅 DOB: ${s.dob||'—'}</span>
+          <span class="meta-item">👤 ${s.gender||'—'}</span>
+          <span class="meta-item">📞 ${s.phone||'—'}</span>
+          <span class="meta-item">📧 ${s.email||'—'}</span>
+          <span class="meta-item">🏫 ${deptName(s.deptId)}</span>
+        </div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card blue"><div class="stat-val">${myEnr.length}</div><div class="stat-lbl">Courses Enrolled</div></div>
+      <div class="stat-card green"><div class="stat-val">${gpa??'—'}</div><div class="stat-lbl">Current GPA</div></div>
+      <div class="stat-card amber"><div class="stat-val">${totalCreds}</div><div class="stat-lbl">Total Credits</div></div>
+    </div>`;
+}
+
+function renderMyCourses() {
+  const s = DB.students[0];
+  if (!s) return;
+  const myEnr = DB.enrollments.filter(e=>e.studentId===s.id);
+  const borderColors = ['var(--accent)','var(--green)','var(--red)','var(--amber)'];
+  document.getElementById('my-courses-grid').innerHTML = myEnr.map((e,i)=>{
+    const c  = DB.courses.find(x=>x.id===e.courseId);
+    const gr = DB.grades.find(g=>g.studentId===s.id&&g.courseId===e.courseId);
+    return `
+    <div class="info-card" style="border-top:3px solid ${borderColors[i%4]}">
+      <div class="info-card-title">${c?c.name:'?'}</div>
+      <div class="info-card-sub">Course ID: ${e.courseId}</div>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:0.83rem;color:var(--muted)">📚 Credits: <strong>${c?c.credits:'?'}</strong></div>
+        <div style="font-size:0.83rem;color:var(--muted)">📅 ${e.semester} ${e.year}</div>
+      </div>
+      <div style="margin-top:12px">${gr ? gradeBadge(gr.grade) : '<span class="badge badge-gray">Grade Pending</span>'}</div>
+    </div>`;
+  }).join('') || '<p style="color:var(--muted)">Not enrolled in any courses</p>';
+}
+
+function renderMyGrades() {
+  const s = DB.students[0];
+  if (!s) return;
+  const myGrades = DB.grades.filter(g=>g.studentId===s.id);
+  const gpa = calcGPA(s.id);
+  let totalCreds=0, rows='';
+  myGrades.forEach(g=>{
+    const c=DB.courses.find(x=>x.id===g.courseId);
+    const pts=GPA_MAP[g.grade]??0; const cr=c?c.credits:3;
+    totalCreds+=cr;
+    rows+=`<tr><td>${c?c.name:'?'}</td><td>${cr}</td><td>${gradeBadge(g.grade)}</td><td>${pts}</td><td>${(pts*cr).toFixed(1)}</td></tr>`;
+  });
+  document.getElementById('my-grades-stats').innerHTML = `
+    <div class="stat-card green"><div class="stat-val">${gpa??'—'}</div><div class="stat-lbl">Current GPA</div></div>
+    <div class="stat-card blue"><div class="stat-val">${myGrades.length}</div><div class="stat-lbl">Courses Graded</div></div>
+    <div class="stat-card amber"><div class="stat-val">${totalCreds}</div><div class="stat-lbl">Credits Completed</div></div>`;
+  document.getElementById('my-grades-tbody').innerHTML = rows +
+    (rows ? `<tr style="background:var(--bg);font-weight:600"><td>Total / GPA</td><td>${totalCreds}</td><td>—</td><td>—</td><td>${gpa??'—'}</td></tr>` : '') ||
+    `<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--muted)">No grades yet</td></tr>`;
+}
+
+function renderMyDept() {
+  const s = DB.students[0];
+  if (!s) return;
+  const dept = DB.departments.find(d=>d.id===s.deptId);
+  if (!dept) return;
+  const dFaculty = DB.faculty.filter(f=>f.deptId===dept.id);
+  const dCourses = DB.courses.filter(c=>c.deptId===dept.id);
+  const dStudents = DB.students.filter(x=>x.deptId===dept.id);
+  document.getElementById('my-dept-content').innerHTML = `
+    <div class="profile-card">
+      <div class="profile-avatar" style="background:var(--accent);font-size:1rem">${dept.name[0]}</div>
+      <div class="profile-info">
+        <div class="name">${dept.name}</div>
+        <div class="sub">Department ID: ${dept.id}</div>
+        <div class="profile-meta">
+          <span class="meta-item">👤 HOD: ${dept.hod}</span>
+          <span class="meta-item">👨‍🎓 ${dStudents.length} Students</span>
+          <span class="meta-item">👨‍🏫 ${dFaculty.length} Faculty</span>
+          <span class="meta-item">📚 ${dCourses.length} Courses</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="card"><div class="card-header"><span class="card-title">Faculty</span></div>
+        <table><thead><tr><th>Name</th><th>Email</th></tr></thead><tbody>
+          ${dFaculty.map(f=>`<tr><td>${f.name}</td><td>${f.email}</td></tr>`).join('')||'<tr><td colspan="2" style="text-align:center;color:var(--muted)">No faculty</td></tr>'}
+        </tbody></table></div>
+      <div class="card"><div class="card-header"><span class="card-title">Courses Offered</span></div>
+        <table><thead><tr><th>Course</th><th>Credits</th></tr></thead><tbody>
+          ${dCourses.map(c=>`<tr><td>${c.name}</td><td>${c.credits}</td></tr>`).join('')||'<tr><td colspan="2" style="text-align:center;color:var(--muted)">No courses</td></tr>'}
+        </tbody></table></div>
+    </div>`;
+}
+
+// =============================================================
+// RENDER: FACULTY VIEWS
+// =============================================================
+function renderFacultyDashboard() {
+  const f = DB.faculty[0];
+  const deptStudents = f ? DB.students.filter(s=>s.deptId===f.deptId) : [];
+  const deptCourses  = f ? DB.courses.filter(c=>c.deptId===f.deptId)  : [];
+  document.getElementById('faculty-dash-stats').innerHTML = `
+    <div class="stat-card blue"><div class="stat-val">${deptStudents.length}</div><div class="stat-lbl">Dept Students</div></div>
+    <div class="stat-card green"><div class="stat-val">${deptCourses.length}</div><div class="stat-lbl">Dept Courses</div></div>
+    <div class="stat-card amber"><div class="stat-val">${DB.grades.length}</div><div class="stat-lbl">Grades Recorded</div></div>`;
+  document.getElementById('faculty-profile-content').innerHTML = f ? `
+    <div class="profile-card">
+      <div class="profile-avatar">${f.name[0]}</div>
+      <div class="profile-info">
+        <div class="name">${f.name}</div>
+        <div class="sub">Faculty ID: ${f.id}</div>
+        <div class="profile-meta">
+          <span class="meta-item">📧 ${f.email}</span>
+          <span class="meta-item">🏫 ${deptName(f.deptId)}</span>
+        </div>
+      </div>
+    </div>` : '';
+}
+
+function renderDeptStudents() {
+  const f = DB.faculty[0];
+  if (!f) return;
+  const students = DB.students.filter(s=>s.deptId===f.deptId);
+  document.getElementById('dept-students-title').textContent = `${deptName(f.deptId)} Department Students`;
+  document.getElementById('dept-students-tbody').innerHTML = students.map(s=>`
+    <tr>
+      <td class="id-cell">${s.id}</td>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.email||'—'}</td>
+      <td><span class="badge ${s.gender==='Male'?'badge-male':'badge-female'}">${s.gender||'—'}</span></td>
+    </tr>`).join('') || `<tr><td colspan="4" style="text-align:center;padding:32px;color:var(--muted)">No students in this department</td></tr>`;
+}
+
+// =============================================================
+// SEARCH
+// =============================================================
+function globalSearch(q) {
+  const results = document.getElementById('search-results');
+  if (!q.trim()) {
+    results.innerHTML = `<div class="card"><div class="card-body empty-state"><div class="empty-icon">🔍</div><p>Type something above to search</p></div></div>`;
+    return;
+  }
+  const lower = q.toLowerCase();
+  const type  = document.getElementById('search-type').value;
+  let matches = [];
+  if (type==='All'||type==='Students')
+    DB.students.filter(s=>s.name.toLowerCase().includes(lower)||String(s.id).includes(lower)||(s.email||'').toLowerCase().includes(lower))
+      .forEach(s=>matches.push({type:'Student',id:s.id,name:s.name,detail:`${deptName(s.deptId)} · ${s.email}`}));
+  if (type==='All'||type==='Faculty')
+    DB.faculty.filter(f=>f.name.toLowerCase().includes(lower)||String(f.id).includes(lower)||(f.email||'').toLowerCase().includes(lower))
+      .forEach(f=>matches.push({type:'Faculty',id:f.id,name:f.name,detail:`${deptName(f.deptId)} · ${f.email}`}));
+  if (type==='All'||type==='Courses')
+    DB.courses.filter(c=>c.name.toLowerCase().includes(lower)||String(c.id).includes(lower))
+      .forEach(c=>matches.push({type:'Course',id:c.id,name:c.name,detail:`${deptName(c.deptId)} · ${c.credits} Credits`}));
+  if (!matches.length) {
+    results.innerHTML = `<div class="card"><div class="card-body empty-state"><div class="empty-icon">😕</div><p>No results for "<strong>${q}</strong>"</p></div></div>`;
+    return;
+  }
+  const rows = matches.map(m=>`<tr><td class="id-cell">${m.id}</td><td><span class="badge badge-gray">${m.type}</span></td><td><strong>${m.name}</strong></td><td style="color:var(--muted);font-size:0.85rem">${m.detail}</td></tr>`).join('');
+  results.innerHTML = `<div class="card"><div class="card-header"><span class="card-title">Results for "${q}" <span class="badge badge-gray">${matches.length} found</span></span></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>Type</th><th>Name</th><th>Details</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+
+// =============================================================
+// DELETE
+// =============================================================
+let pendingDelete = null;
+
+function deleteConfirm(type, id, name) {
+  pendingDelete = { type, id };
+  document.getElementById('delete-name').textContent = `${name} (${type})`;
+  openModal('delete-modal');
+}
+
+async function confirmDelete() {
+  if (!pendingDelete) return;
+  const { type, id } = pendingDelete;
+  try {
+    if (type==='student')    await apiFetch(`/students/${id}`,    { method:'DELETE' });
+    if (type==='faculty')    await apiFetch(`/faculty/${id}`,     { method:'DELETE' });
+    if (type==='department') await apiFetch(`/departments/${id}`, { method:'DELETE' });
+    if (type==='course')     await apiFetch(`/courses/${id}`,     { method:'DELETE' });
+    if (type==='enrollment') await apiFetch(`/enrollments/${id}`, { method:'DELETE' });
+    if (type==='grade')      await apiFetch(`/grades/${id}`,      { method:'DELETE' });
+    showToast('Deleted successfully', 'success');
+    closeModal('delete-modal');
+    await loadAll();
+    const refreshMap = {
+      student:'renderStudents', faculty:'renderFaculty', department:'renderDepartments',
+      course:'renderCourses', enrollment:'renderEnrollments', grade:'renderGrades'
+    };
+    if (refreshMap[type]) window[refreshMap[type]]();
+  } catch(e) {}
+  pendingDelete = null;
+}
+
+// =============================================================
+// MODALS & TOAST
+// =============================================================
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.classList.remove('open'); });
+});
+
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+});
+
+function showToast(msg, type='') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast '+(type||'');
+  t.innerHTML = (type==='success'?'✓ ':type==='error'?'✗ ':'')+msg;
+  c.appendChild(t);
+  setTimeout(()=>{ t.style.cssText='opacity:0;transform:translateY(10px);transition:all 0.3s'; setTimeout(()=>t.remove(),300); }, 3000);
+}
+</script>
+</body>
+</html>
